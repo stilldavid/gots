@@ -45,25 +45,32 @@ func main() {
 	showEbp := flag.Bool("ebp", false, "Output EBP info. This is a lot of info")
 	showPacketNumberOfPID := flag.Int("pid", 0, "Dump the contents of the first packet encountered on PID to stdout")
 	flag.Parse()
+
 	if *fileName == "" {
 		flag.Usage()
 		return
 	}
+
 	tsFile, err := os.Open(*fileName)
 	if err != nil {
 		printlnf("Cannot access test asset %s.", fileName)
 		return
 	}
+
 	defer func(file *os.File) {
 		err := file.Close()
-		fmt.Println("Cannot close File", file.Name(), err)
+		if err != nil {
+			fmt.Println("Cannot close File", file.Name(), err)
+		}
 	}(tsFile)
+
 	pat, err := extractPat(tsFile)
 	if err != nil {
 		println(err)
 		return
 	}
 	printPat(pat)
+
 	if *showPmt {
 		pmt, err := extractPmt(tsFile, pat.ProgramMapPid())
 		if err != nil {
@@ -71,6 +78,7 @@ func main() {
 		}
 		printPmt(pmt)
 	}
+
 	pkt := make([]byte, packet.PacketSize, packet.PacketSize)
 	var offset int64
 	var numPackets uint64
@@ -80,8 +88,10 @@ func main() {
 		if err == io.EOF || read == 0 {
 			break
 		}
+
 		offset += packet.PacketSize
 		numPackets++
+
 		if *showEbp {
 			ebpBytes, err := adaptationfield.EncoderBoundaryPoint(pkt)
 			if err != nil {
@@ -97,20 +107,22 @@ func main() {
 			ebps[numPackets] = boundaryPoint
 			printlnf("Packet %d contains EBP %+v", numPackets, boundaryPoint)
 		}
+
 		if *showPacketNumberOfPID != 0 {
 			pid := uint16(*showPacketNumberOfPID)
 			pktPid, err := packet.Pid(pkt)
 			if err != nil {
 				continue
 			}
+
 			if pktPid == pid {
 				printlnf("First Packet of PID %d contents: %x", pid, pkt)
 				break
 			}
 		}
 	}
-	println()
 
+	println()
 }
 
 func printPmt(pmt psi.PMT) {
@@ -129,7 +141,7 @@ func printPat(pat psi.PAT) {
 	println("Pat")
 	printlnf("\tPMT PID %12v", pat.ProgramMapPid())
 	printlnf("\tProgramNumber %6v", pat.ProgramNumber())
-	printlnf("\tNumber of Programs %v", pat.ProgramNumber())
+	printlnf("\tNumber of Programs %v", pat.NumPrograms())
 }
 
 func extractPat(buf io.Reader) (psi.PAT, error) {
@@ -146,7 +158,7 @@ func extractPat(buf io.Reader) (psi.PAT, error) {
 		if err != nil {
 			return nil, err
 		}
-		if pid == 0 {
+		if pid == psi.PatPid {
 			pay, err := packet.Payload(pkt)
 			if err != nil {
 				println(err)
@@ -164,9 +176,11 @@ func extractPat(buf io.Reader) (psi.PAT, error) {
 	}
 	return nil, fmt.Errorf("No pat found")
 }
+
 func printlnf(format string, a ...interface{}) {
 	fmt.Printf(format+"\n", a...)
 }
+
 func extractPmt(buf io.Reader, pid uint16) (psi.PMT, error) {
 	pkt := make([]byte, packet.PacketSize)
 	pmtAcc := packet.NewAccumulator(psi.PmtAccumulatorDoneFunc)

@@ -62,7 +62,7 @@ func EncoderBoundaryPoint(pkt packet.Packet) ([]byte, error) {
 	}
 	hasAdapt, err := packet.ContainsAdaptationField(pkt)
 	if err != nil {
-		return emptyByteSlice, nil
+		return emptyByteSlice, err
 	}
 	if hasAdapt && Length(pkt) > 0 && HasTransportPrivateData(pkt) {
 		ebp, err := TransportPrivateData(pkt)
