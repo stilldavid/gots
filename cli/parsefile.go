@@ -53,7 +53,7 @@ func main() {
 
 	tsFile, err := os.Open(*fileName)
 	if err != nil {
-		fmt.Printf("Cannot access file %s.\n", fileName)
+		fmt.Printf("Cannot access file %s.\n", *fileName)
 		return
 	}
 
