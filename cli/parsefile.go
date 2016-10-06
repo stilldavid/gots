@@ -53,7 +53,7 @@ func main() {
 
 	tsFile, err := os.Open(*fileName)
 	if err != nil {
-		printlnf("Cannot access test asset %s.", fileName)
+		fmt.Printf("Cannot access file %s.\n", fileName)
 		return
 	}
 
@@ -105,7 +105,7 @@ func main() {
 				continue
 			}
 			ebps[numPackets] = boundaryPoint
-			printlnf("Packet %d contains EBP %+v", numPackets, boundaryPoint)
+			fmt.Printf("Packet %d contains EBP %+v\n", numPackets, boundaryPoint)
 		}
 
 		if *showPacketNumberOfPID != 0 {
@@ -116,7 +116,7 @@ func main() {
 			}
 
 			if pktPid == pid {
-				printlnf("First Packet of PID %d contents: %x", pid, pkt)
+				fmt.Printf("First Packet of PID %d contents: %x\n", pid, pkt)
 				break
 			}
 		}
@@ -126,22 +126,22 @@ func main() {
 }
 
 func printPmt(pmt psi.PMT) {
-	println("PMT")
-	printlnf("\tPIDs %v", pmt.Pids())
-	println("\tElementary Streams")
+	fmt.Println("PMT")
+	fmt.Printf("\tPIDs %v\n", pmt.Pids())
+	fmt.Println("\tElementary Streams")
 	for _, es := range pmt.ElementaryStreams() {
-		printlnf("\t\tPid %v : StreamType %v", es.ElementaryPid(), es.StreamType())
+		fmt.Printf("\t\tPid %v : StreamType %v\n", es.ElementaryPid(), es.StreamType())
 		for _, d := range es.Descriptors() {
-			printlnf("\t\t\t%+v", d)
+			fmt.Printf("\t\t\t%+v\n", d)
 		}
 	}
 }
 
 func printPat(pat psi.PAT) {
-	println("Pat")
-	printlnf("\tPMT PID %12v", pat.ProgramMapPid())
-	printlnf("\tProgramNumber %6v", pat.ProgramNumber())
-	printlnf("\tNumber of Programs %v", pat.NumPrograms())
+	fmt.Println("Pat")
+	fmt.Printf("\tPMT PID %12v\n", pat.ProgramMapPid())
+	fmt.Printf("\tProgramNumber %6v\n", pat.ProgramNumber())
+	fmt.Printf("\tNumber of Programs %v\n", pat.NumPrograms())
 }
 
 func extractPat(buf io.Reader) (psi.PAT, error) {
@@ -175,10 +175,6 @@ func extractPat(buf io.Reader) (psi.PAT, error) {
 		}
 	}
 	return nil, fmt.Errorf("No pat found")
-}
-
-func printlnf(format string, a ...interface{}) {
-	fmt.Printf(format+"\n", a...)
 }
 
 func extractPmt(buf io.Reader, pid uint16) (psi.PMT, error) {
