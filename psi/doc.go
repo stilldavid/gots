@@ -107,6 +107,7 @@ type PmtElementaryStream interface {
 type PmtDescriptor interface {
 	Tag() uint8
 	Format() string
+	Data() string
 	IsIso639LanguageDescriptor() bool
 	IsMaximumBitrateDescriptor() bool
 	IsIFrameProfile() bool

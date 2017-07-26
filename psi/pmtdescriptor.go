@@ -54,6 +54,10 @@ func (descriptor *pmtDescriptor) Format() string {
 	return fmt.Sprintf("[tag=%b, decoded=%s]\n", descriptor.tag, descriptor.decode())
 }
 
+func (descriptor *pmtDescriptor) Data() string {
+	return string(descriptor.data)
+}
+
 func (descriptor *pmtDescriptor) decode() string {
 	switch descriptor.tag {
 	case LANGUAGE:
